@@ -1,11 +1,9 @@
-from flask import Flask , render_template , url_for, flash , redirect 
-from forms import LoginForm , RegisterForm
 
+from flask import render_template , url_for, flash , redirect 
+from src.forms import LoginForm , RegisterForm
+from src.models import User , Lesson , Course
+from src import app
 
-
-app = Flask(__name__)
-
-app.config["SECRET_KEY"]="0d97a641b022202ee46a9f48cdf6e15a3ee1dac999601d21cbe3143206c3664b"
 lessons = [{
     'title': 'Request Library Course',
     'course': 'Python',
@@ -109,11 +107,3 @@ def login():
             flash("you have been logged in unsuccessfuly , check the password or the email" , "danger")
 
     return render_template("login.html" , form=form , title="Register")
-
-if __name__ == "__main__":
-    app.run(debug=True)
-
-
- 
-
-
