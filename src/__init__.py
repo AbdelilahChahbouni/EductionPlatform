@@ -9,5 +9,7 @@ app.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///database.db"
 db = SQLAlchemy(app)
 bcr = Bcrypt(app)
 login_manger = LoginManager(app)
+login_manger.login_view = 'login'
+login_manger.login_message_category = 'info'
 
 from src import routes

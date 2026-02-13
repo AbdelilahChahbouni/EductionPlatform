@@ -1,9 +1,9 @@
 
-from flask import render_template , url_for, flash , redirect 
+from flask import render_template , url_for, flash , redirect , request
 from src.forms import LoginForm , RegisterForm
 from src.models import User , Lesson , Course
 from src import app , bcr , db
-from flask_login import login_user , logout_user , current_user 
+from flask_login import login_user , logout_user , current_user  , login_required
 
 lessons = [{
     'title': 'Request Library Course',
@@ -112,8 +112,9 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcr.check_password_hash(user.password , form.password.data):
             login_user(user , remember=form.remember.data)
+            next_page = request.args.get('next')
             flash("you have been logged in succesfully" , "success")
-            return redirect(url_for("home"))
+            return redirect(next_page) if next_page else redirect(url_for("home"))
         else:
             flash("you have been logged in unsuccessfuly , check the password or the email" , "danger")
 
@@ -125,6 +126,7 @@ def logout():
     return redirect(url_for("home"))
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
     return render_template("dashboard.html" , title="Dashboard")
 
