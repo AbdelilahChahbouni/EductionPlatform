@@ -1,10 +1,11 @@
 
 from flask import render_template , url_for, flash , redirect , request
-from src.forms import LoginForm , RegisterForm
+from src.forms import LoginForm , RegisterForm , UpdateProfileForm
 from src.models import User , Lesson , Course
 from src import app , bcr , db
 from flask_login import login_user , logout_user , current_user  , login_required
-
+import secrets , os
+from PIL import Image
 lessons = [{
     'title': 'Request Library Course',
     'course': 'Python',
@@ -78,6 +79,20 @@ courses = [
 ]
 
 
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    _ , f_ext = os.path.splitext(form_picture.filename)
+    picture_name = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, "static/images" , picture_name)
+    output_size =(150 , 150) 
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+    return picture_name
+
+
+
+
 
 @app.route("/")
 @app.route("/home")
@@ -125,8 +140,25 @@ def logout():
     logout_user()
     return redirect(url_for("home"))
 
-@app.route("/dashboard")
+@app.route("/dashboard" , methods=["GET" , "POST"])
 @login_required
 def dashboard():
-    return render_template("dashboard.html" , title="Dashboard")
+    form_profile = UpdateProfileForm()
+    if form_profile.validate_on_submit():
+        if form_profile.picture.data:
+            picture_file = save_picture(form_profile.picture.data)
+            current_user.image_profile = picture_file
+        current_user.username = form_profile.username.data
+        current_user.email = form_profile.email.data
+        current_user.bio = form_profile.bio.data
+        db.session.commit()
+        flash("You Profile is Updated Successfuly" , "success")
+        return redirect(url_for("dashboard"))
+    elif request.method == "GET":
+        form_profile.username.data = current_user.username
+        form_profile.email.data = current_user.email
+        form_profile.bio.data = current_user.bio
+
+    image_file = url_for("static", filename=f"images/{current_user.image_profile}") 
+    return render_template("dashboard.html" , title="Dashboard" , profile_form=form_profile , image_file=image_file)
 

@@ -19,6 +19,7 @@ class User(db.Model , UserMixin):
     email = db.Column(db.String(125) , nullable=False , unique=True)
     password = db.Column(db.String(60) , nullable=False)
     image_profile = db.Column(db.String(20) , default="default.png")
+    bio = db.Column(db.Text , nullable=True)
     lesson = db.relationship("Lesson" , backref='author' , lazy=True)
 
     def __repr__(self):
